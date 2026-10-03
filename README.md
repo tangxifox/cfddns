@@ -1,7 +1,24 @@
 # cfddns — Cloudflare DDNS 客户端
 
+[![build](https://github.com/tangxifox/cfddns/actions/workflows/build.yml/badge.svg)](https://github.com/tangxifox/cfddns/actions/workflows/build.yml)
+
 把本机当前的公网 IP 自动同步到 Cloudflare 的 A / AAAA 记录上。
 单文件静态二进制，**零第三方依赖**（连 YAML 解析都是内置实现）。
+
+## 下载预编译版本
+
+从 [Releases](https://github.com/tangxifox/cfddns/releases/latest) 下载对应平台的文件：
+
+```bash
+# Linux x86_64（ARM64 把 amd64 换成 arm64）
+curl -fsSL -o cfddns \
+  https://github.com/tangxifox/cfddns/releases/latest/download/cfddns-linux-amd64
+chmod +x cfddns && sudo install -m 0755 cfddns /usr/local/bin/cfddns
+
+# Windows：下载 cfddns-windows-amd64.exe 后重命名为 cfddns.exe
+```
+
+同一 Release 附带 `SHA256SUMS.txt` 可校验完整性。
 
 ## 为什么是 Go
 
@@ -14,16 +31,34 @@
 ## 构建
 
 ```bash
-./build.sh                 # 本机架构
-./build.sh windows         # 交叉编译出 cfddns.exe
+./build.sh                 # 本机架构 -> dist/cfddns-<goos>-<goarch>
+./build.sh all             # 全平台（与 CI 产物命名一致）
+./build.sh arm64           # 只出 linux/arm64
+./build.sh windows         # 只出 windows/amd64
 ```
 
-产物：`dist/cfddns`（Linux）与 `dist/cfddns.exe`（Windows，可选）。
+产物命名 `cfddns-<goos>-<goarch>[.exe]`，与 Release 附件同名。
+
+### CI
+
+`.github/workflows/build.yml` 在 push、PR、手动触发时：
+
+1. `go vet` + `go test`；
+2. 并行构建 **linux/amd64、linux/arm64、windows/amd64**，每个平台独立上传 artifact
+   （含 `SHA256SUMS.txt`），任一平台失败不影响其他平台；
+3. push `v*` tag 时额外把三个二进制发布到 GitHub Release。
+
+发布新版本：
+
+```bash
+git tag -a v1.0.1 -m "cfddns v1.0.1"
+git push origin v1.0.1
+```
 
 ## 安装与首次使用
 
 ```bash
-install -m 0755 dist/cfddns /usr/local/bin/cfddns
+install -m 0755 dist/cfddns-$(uname -s | tr 'A-Z' 'a-z')-$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') /usr/local/bin/cfddns
 cfddns                     # 首次运行会自动生成 ~/.cfddns/config.yaml 并提示填写
 ```
 
