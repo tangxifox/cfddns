@@ -1,0 +1,23 @@
+# 构建产物
+/dist/
+*.exe
+
+# 本地配置与状态（含真实令牌，绝不能提交）
+config.yaml
+state.json
+.cfddns/
+
+# 编辑器与系统
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 备份与临时文件
+*.bak
+*.tmp
+*.log
+
+# 本地推送辅助脚本（只在本机用）
+push-to-github.sh

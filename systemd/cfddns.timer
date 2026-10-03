@@ -1,0 +1,14 @@
+[Unit]
+Description=定时运行 cfddns（每 5 分钟检查一次公网 IP）
+
+[Timer]
+# 开机 2 分钟后开始，之后每 5 分钟一次
+OnBootSec=2min
+OnUnitActiveSec=5min
+# 机器休眠/关机期间错过的运行，唤醒后补一次
+Persistent=true
+# 加一点随机抖动，避免多台机器同一秒打 API
+RandomizedDelaySec=30s
+
+[Install]
+WantedBy=timers.target
